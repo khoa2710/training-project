@@ -1,0 +1,12 @@
+# Node
+**/node_modules/
+**/dist/
+
+# .NET
+**/bin/
+**/obj/
+
+# IDE/OS
+**/.vs/
+**/.vscode/
+.DS_Store
