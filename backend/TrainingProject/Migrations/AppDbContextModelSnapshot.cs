@@ -22,7 +22,7 @@ namespace TrainingProject.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TrainingProject.Models.User", b =>
+            modelBuilder.Entity("TrainingProject.Data.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrainingProject.Models;
+using TrainingProject.Data.Entities;
 
 namespace TrainingProject.Data;
 
@@ -18,5 +18,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .HasMaxLength(20);
+
+        base.OnModelCreating(modelBuilder);
     }
 }

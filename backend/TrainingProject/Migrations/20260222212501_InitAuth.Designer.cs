@@ -12,7 +12,7 @@ using TrainingProject.Data;
 namespace TrainingProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260204083223_InitAuth")]
+    [Migration("20260222212501_InitAuth")]
     partial class InitAuth
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace TrainingProject.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TrainingProject.Models.User", b =>
+            modelBuilder.Entity("TrainingProject.Data.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
