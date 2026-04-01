@@ -65,6 +65,33 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Seed default admin user when no users exist
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+
+    var admin = db.Users.FirstOrDefault(u => u.Username == "admin");
+    if (admin is null)
+    {
+        admin = new TrainingProject.Data.Entities.User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+            Role = "Admin",
+            IsFirstLogin = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        };
+        db.Users.Add(admin);
+    }
+    else
+    {
+        // Reset admin password on startup (dev convenience)
+        admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+    }
+    db.SaveChanges();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

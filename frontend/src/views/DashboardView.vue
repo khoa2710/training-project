@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import api from '@/services/api'
 
 const auth = useAuthStore()
 const users = ref<Array<{ id: number; username: string; role: string; createdAt: string; isFirstLogin: boolean }>>([])
 const loading = ref(false)
 const error = ref('')
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
-
 const fetchUsers = async () => {
   loading.value = true
   error.value = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/users`, {
-      headers: {
-        Authorization: `Bearer ${auth.token}`,
-      },
-    })
-    if (!res.ok) throw new Error('Cannot retrieve users')
+    const { data } = await api.get('/api/users')
 
-    const data = await res.json()
     interface UserData {
       id: number
       username: string
