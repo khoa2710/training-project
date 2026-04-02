@@ -43,6 +43,10 @@ if (string.IsNullOrWhiteSpace(jwtKey))
 {
     throw new InvalidOperationException("Missing Jwt:Key in appsettings.json");
 }
+if (Encoding.UTF8.GetByteCount(jwtKey) < 16)
+{
+    throw new InvalidOperationException("Jwt:Key must be at least 16 bytes (128 bits) for HS256.");
+}
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
