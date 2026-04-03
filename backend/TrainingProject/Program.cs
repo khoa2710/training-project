@@ -43,6 +43,10 @@ if (string.IsNullOrWhiteSpace(jwtKey))
 {
     throw new InvalidOperationException("Missing Jwt:Key in appsettings.json");
 }
+if (Encoding.UTF8.GetByteCount(jwtKey) < 16)
+{
+    throw new InvalidOperationException("Jwt:Key must be at least 16 bytes (128 bits) for HS256.");
+}
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -64,6 +68,33 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Seed default admin user when no users exist
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+
+    var admin = db.Users.FirstOrDefault(u => u.Username == "admin");
+    if (admin is null)
+    {
+        admin = new TrainingProject.Data.Entities.User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+            Role = "Admin",
+            IsFirstLogin = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        };
+        db.Users.Add(admin);
+    }
+    else
+    {
+        // Reset admin password on startup (dev convenience)
+        admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+    }
+    db.SaveChanges();
+}
 
 if (app.Environment.IsDevelopment())
 {

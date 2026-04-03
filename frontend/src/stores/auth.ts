@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import router from '../router'
+import api from '../services/api'
 
 type LoginResponse = {
   id: number
@@ -11,7 +12,6 @@ type LoginResponse = {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
   const token = ref<string>(localStorage.getItem('auth_token') || '')
   const userId = ref<number>(Number(localStorage.getItem('auth_userid') || '0'))
   const username = ref<string>(localStorage.getItem('auth_username') || '')
@@ -49,18 +49,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const login = async (usernameInput: string, password: string) => {
-    const resp = await fetch(`${baseUrl}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: usernameInput, password }),
+    const { data } = await api.post<LoginResponse>('/api/auth/login', {
+      username: usernameInput,
+      password,
     })
 
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => null)
-      throw new Error(err?.message || 'Login failed')
-    }
-
-    const data = (await resp.json()) as LoginResponse
     saveState(data)
 
     if (data.isFirstLogin) {
@@ -78,19 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
   const completeFirstLogin = async (newPassword: string) => {
     if (!userId.value) throw new Error('User ID is missing')
 
-    const resp = await fetch(`${baseUrl}/api/users/${userId.value}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token.value}`,
-      },
-      body: JSON.stringify({ password: newPassword }),
-    })
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => null)
-      throw new Error(err?.message || 'Password change failed')
-    }
+    await api.put(`/api/users/${userId.value}`, { password: newPassword })
 
     isFirstLogin.value = false
     localStorage.setItem('auth_isFirstLogin', 'false')

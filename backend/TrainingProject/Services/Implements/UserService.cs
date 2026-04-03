@@ -92,6 +92,24 @@ public class UserService : IUserService
         return ToDto(entity);
     }
 
+    public async Task<UserDto?> ChangePasswordAsync(int id, ChangePasswordRequest request, CancellationToken ct = default)
+    {
+        var entity = await _users.GetByIdAsync(id, ct);
+        if (entity is null) return null;
+
+        var oldPasswordOk = BCrypt.Net.BCrypt.Verify(request.OldPassword, entity.PasswordHash);
+        if (!oldPasswordOk)
+            throw new InvalidOperationException("Old password is incorrect");
+
+        entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        entity.IsFirstLogin = false;
+
+        _users.Update(entity);
+        await _users.SaveChangesAsync(ct);
+
+        return ToDto(entity);
+    }
+
     public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
     {
         var entity = await _users.GetByIdAsync(id, ct);

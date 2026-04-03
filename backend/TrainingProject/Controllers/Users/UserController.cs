@@ -60,6 +60,26 @@ public class UsersController : ControllerBase
         return u is null ? NotFound() : Ok(u);
     }
 
+    [HttpPut("{id:int}/change-password")]
+    public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest req, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            var u = await _userService.ChangePasswordAsync(id, req, ct);
+            if (u is null)
+                return NotFound(new { message = "User not found" });
+
+            return Ok(new { message = "Password changed successfully" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
         => (await _userService.DeleteAsync(id, ct)) ? NoContent() : NotFound();

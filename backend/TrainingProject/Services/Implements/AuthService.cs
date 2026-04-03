@@ -28,9 +28,7 @@ public class AuthService : IAuthService
         var ok = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!ok) return null;
 
-        // placeholder until we implement real JWT
-        var token = $"DEV-TOKEN-{user.Id}-{Guid.NewGuid()}";
-        // var token = GenerateJwtToken(user.Id, user.Username, user.Role);
+        var token = GenerateJwtToken(user.Id, user.Username, user.Role);
 
         return new LoginResponseDto
         {
@@ -41,7 +39,7 @@ public class AuthService : IAuthService
             Token = token
         };
     }
-    private string GenerateJwtToken(Guid userId, string username, string role)
+    private string GenerateJwtToken(int userId, string username, string role)
     {
         var key = _config["Jwt:Key"]!;
         var issuer = _config["Jwt:Issuer"]!;

@@ -5,4 +5,5 @@ namespace TrainingProject.Services.Abstractions;
 
 public interface IUserService : IService<UserDto, CreateUserRequest, UpdateUserRequest>
 {
+	Task<UserDto?> ChangePasswordAsync(int id, ChangePasswordRequest request, CancellationToken ct = default);
 }
